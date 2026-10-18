@@ -11,20 +11,20 @@ const pages = resolvePageToggles({
 	// ── 社交 (Social) ──────────────────────────────────
 
 	// 友链页面开关
-	friends: true,
+	friends: false,
 	// 留言板页面开关，需要配置评论系统
 	guestbook: true,
 
 	// ── 我的 (My) ──────────────────────────────────
 
 	// 动态页面开关
-	dynamic: true,
+	dynamic: false,
 	// 项目展示页开关
 	projects: true,
 	// 相册页面开关
-	gallery: true,
+	gallery: false,
 	// 书签导航页面开关
-	booknav: true,
+	booknav: false,
 	// 哔哩哔哩追番页面开关
 	bilibili: false,
 	// 番组计划页面开关
@@ -37,7 +37,7 @@ const pages = resolvePageToggles({
 	// ── 关于 (About) ──────────────────────────────────
 
 	// 打赏页面开关
-	sponsor: true,
+	sponsor: false,
 });
 
 export const siteConfig: SiteConfig = {
@@ -306,7 +306,7 @@ export const siteConfig: SiteConfig = {
 	// ── MyAnimeList配置 ──────────────────────────────────
 	mal: {
 		// MyAnimeList 用户名（列表需为公开状态，私密列表无法读取）
-		username: "cuteleaf",
+		username: "",
 		// MyAnimeList Client ID，在 https://myanimelist.net/apiconfig 注册免费应用后获取
 		clientId: "	0ef34371450f9c6c809deaadec6aa8f3",
 		// MAL API 地址
