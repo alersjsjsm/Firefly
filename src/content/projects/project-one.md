@@ -4,7 +4,6 @@ published: 2025-03-01
 draft: false
 order: 100
 description: "一句话说明这个项目做了什么、解决了什么问题。"
-image: "images/project-one.avif"
 status: "published"
 tags:
   - 【技术栈1】

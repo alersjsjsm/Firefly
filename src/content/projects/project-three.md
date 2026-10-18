@@ -4,7 +4,6 @@ published: 2025-01-01
 draft: false
 order: 80
 description: "一句话说明这个项目做了什么、解决了什么问题。"
-image: "images/project-three.avif"
 status: "archived"
 tags:
   - 【技术栈1】
