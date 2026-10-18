@@ -6,13 +6,16 @@ export const profileConfig: ProfileConfig = {
 	// 1. public 目录（以 "/" 开头，不优化）："/assets/images/avatar.webp"
 	// 2. src 目录（不以 "/" 开头，自动优化但会增加构建时间，推荐）："assets/images/avatar.webp"
 	// 3. 远程 URL："https://example.com/avatar.jpg"
+	// ⚠️ 换自己的头像：把你的图片命名为 avatar.avif（或 .webp/.png），
+	//    放到 src/assets/images/ 目录，然后按下一行的格式填写文件名。
 	avatar: "assets/images/avatar.avif",
 
 	// 名字
-	name: "XiaYe",
+	name: "耙耙柑",
 
 	// 个人签名
-	bio: "Hello, I'm XiaYe.",
+	// ⚠️ 建议改成一句能代表你的话，会显示在侧边栏头像下方
+	bio: "慢慢来，比较快。",
 
 	// 链接配置
 	// 已经预装的图标集：fa7-brands，fa7-regular，fa7-solid，material-symbols，simple-icons
@@ -24,13 +27,13 @@ export const profileConfig: ProfileConfig = {
 		{
 			name: "GitHub",
 			icon: "fa7-brands:github",
-			url: "https://github.com/CuteLeaf",
+			url: "https://github.com/alersjsjsm",
 			showName: false,
 		},
 		{
 			name: "Email",
 			icon: "fa7-solid:envelope",
-			url: "mailto:xiaye@msn.com",
+			url: "mailto:3095462081@qq.com",
 			showName: false,
 		},
 		{

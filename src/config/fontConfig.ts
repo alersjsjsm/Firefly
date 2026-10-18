@@ -93,14 +93,19 @@ export const fontConfig: FontSelectionConfig = {
 
 	// 各区域独立字体设置（填写上方 fonts 中的 cssVariable，留空则使用全局 selected 字体）
 	// 例如：bannerTitleFont: "--font-inter", 表示主页横幅主标题使用 Inter 字体
+	// ⚠️ 注意：本机（中国大陆网络）无法访问 cdn.jsdelivr.net，
+	//    而 fontsource provider 的字体文件正是从该域名下载的，
+	//    一旦这里引用上述变量，pnpm dev / pnpm build 会因 CannotFetchFontFile 失败。
+	//    因此这里全部留空，回退到系统字体。若你的网络能访问 jsdelivr，
+	//    可改回 "--font-zen-maru-gothic" / "--font-inter" / "--font-jetbrains-mono"。
 	// 主页横幅主标题字体
-	bannerTitleFont: "--font-zen-maru-gothic",
+	bannerTitleFont: "",
 	// 主页横幅副标题字体
-	bannerSubtitleFont: "--font-inter",
+	bannerSubtitleFont: "",
 	// 导航栏标题字体
 	navbarTitleFont: "",
 	// 代码块字体（用于代码高亮和等宽字体场景）
-	codeFont: "--font-jetbrains-mono",
+	codeFont: "",
 
 	// 本地字体子集化配置（构建时由 scripts/subset-fonts.ts 处理）
 	// key 为 fonts 数组中对应的 cssVariable，value 为子集化选项

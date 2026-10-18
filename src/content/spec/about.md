@@ -1,27 +1,63 @@
-# 关于我 / About Me
+# 关于我
 
-你好！我是 **夏叶** ，一个在数字世界中默默无闻的一片叶子。
+你好，我是 **耙耙柑**。
 
-## 🛠️ 关于本站
-
-这个网站使用 **Astro** 框架构建，采用了 [Firefly](https://github.com/CuteLeaf/Firefly) 模板，Firefly 是基于 [Fuwari](https://github.com/saicaca/fuwari) 的二次开发。
-
-**Firefly** 是一款基于 Astro 框架和 Fuwari 模板开发的清新美观且现代化个人博客主题模板，专为技术爱好者和内容创作者设计。该主题融合了现代 Web 技术栈，提供了丰富的功能模块和高度可定制的界面，让您能够轻松打造出专业且美观的个人博客网站。
-
-
-**🖥️在线预览： [Firefly - Demo site](https://firefly.cuteleaf.cn/)**
-
-**📝Firefly使用文档： [https://docs-firefly.cuteleaf.cn](https://docs-firefly.cuteleaf.cn/)**
-
-**⭐Firefly开源地址：[https://github.com/CuteLeaf/Firefly](https://github.com/CuteLeaf/Firefly)** 
-
-**⭐Fuwari开源地址：[https://github.com/saicaca/fuwari](https://github.com/saicaca/fuwari)**
-
-::github{repo="CuteLeaf/Firefly"}
-
-::github{repo="saicaca/fuwari"}
+> 【一句话介绍自己】比如：一名正在寻找前端开发岗位的应届生 / 一名喜欢把想法做成产品的开发者。
 
 ---
 
-*感谢你的来访！希望在这里能找到对你有用的内容！*
+## 我在做什么
 
+【两到三句话说明你当前的状态和目标】
+
+- 目前在【学校 / 公司 / 自学】，方向是【你的方向，例如：前端开发 / 后端开发 / 数据分析】
+- 正在找【校招 / 社招 / 实习】机会，期望城市【城市】
+- 最近在学【正在学的东西】，在做一个【正在做的项目】
+
+---
+
+## 技能
+
+**熟悉**　【技能1】·【技能2】·【技能3】
+
+**了解**　【技能4】·【技能5】
+
+**工具**　Git · VS Code · 【其他常用工具】
+
+> 写技能时只写你真的能上手用的。面试官会顺着简历和这里问细节，
+> 写"精通"而答不上来比不写更伤。
+
+---
+
+## 项目经历
+
+我把自己做过的东西整理在 [项目](/projects/) 页面，每个项目都写了背景、我负责的部分和结果。
+
+如果想快速了解，可以看这三个：
+
+- 【项目一名称】—— 【一句话说明它解决了什么问题】
+- 【项目二名称】—— 【一句话说明它解决了什么问题】
+- 【项目三名称】—— 【一句话说明它解决了什么问题】
+
+---
+
+## 联系我
+
+- **邮箱**：3095462081@qq.com
+- **GitHub**：https://github.com/alersjsjsm
+- 【其他平台，如掘金 / 知乎 / B站】
+
+有合适的机会或想聊点什么，欢迎随时找我。
+
+---
+
+## 关于本站
+
+这个博客用 **Astro** 构建，采用 [Firefly](https://github.com/CuteLeaf/Firefly) 主题
+（基于 [Fuwari](https://github.com/saicaca/fuwari) 二次开发）。
+
+::github{repo="CuteLeaf/Firefly"}
+
+---
+
+*感谢来访，希望这里的内容对你有用。*
