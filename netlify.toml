@@ -1,0 +1,20 @@
+# Netlify 部署配置
+# 这份文件让 Netlify 自动知道怎么构建，界面上几乎不用填
+
+[build]
+  # 构建命令（用 pnpm，因为项目 preinstall 强制要求）
+  command = "pnpm build"
+  # 构建产物目录
+  publish = "dist"
+
+[build.environment]
+  # Firefly 要求 Node >= 22.23.0
+  # 注意：这里设置后，Netlify 界面上的 Node 版本选择会被覆盖
+  NODE_VERSION = "22.23.0"
+
+# 静态站点，不需要重定向规则
+# 下面保留 SPA 风格的 404 处理（Astro 已生成自己的 404.html，这条是兜底）
+[[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404
