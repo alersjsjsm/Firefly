@@ -6,9 +6,8 @@ export const profileConfig: ProfileConfig = {
 	// 1. public 目录（以 "/" 开头，不优化）："/assets/images/avatar.webp"
 	// 2. src 目录（不以 "/" 开头，自动优化但会增加构建时间，推荐）："assets/images/avatar.webp"
 	// 3. 远程 URL："https://example.com/avatar.jpg"
-	// ⚠️ 换自己的头像：把你的图片命名为 avatar.avif（或 .webp/.png），
-	//    放到 src/assets/images/ 目录，然后按下一行的格式填写文件名。
-	avatar: "assets/images/avatar.avif",
+	// 换头像：把你的图片放进 src/assets/images/，然后改下面这行的文件名。
+	avatar: "assets/images/avatar-sigrika-v2.webp",
 
 	// 名字
 	name: "耙耙柑",

@@ -1,0 +1,614 @@
+---
+import { Icon } from "astro-icon/components";
+import { musicPlayerConfig } from "@/config/musicConfig";
+import I18nKey from "@/i18n/i18nKey";
+import { i18n } from "@/i18n/translation";
+
+// 全屏歌词视图
+// 触发方式：点击播放器里的歌名（.music-title）
+// 特点：不跳转页面，只覆盖视口，因此播放不会中断
+const config = musicPlayerConfig;
+
+const fsConfigStr = JSON.stringify({
+	i18n: {
+		noLyrics: i18n(I18nKey.musicNoLyrics),
+		loadingLyrics: i18n(I18nKey.musicLoadingLyrics),
+		failedLyrics: i18n(I18nKey.musicFailedLyrics),
+		noPlaying: i18n(I18nKey.musicNoPlaying),
+		music: i18n(I18nKey.music),
+	},
+});
+---
+
+<div
+	id="music-fullscreen"
+	class="music-fs fixed inset-0 z-[200] hidden items-center justify-center"
+	style="background-color: oklch(12% 0.010 60)"
+	role="dialog"
+	aria-modal="true"
+	aria-label={i18n(I18nKey.music)}
+>
+	<!-- 背景层：歌曲封面模糊 → 主题橘色氛围 → 压暗 → 玻璃面板 → 噪点 -->
+	<div class="music-fs-bg absolute inset-0 bg-cover bg-center"></div>
+	<div class="music-fs-tint absolute inset-0"></div>
+	<div class="music-fs-backdrop absolute inset-0"></div>
+
+	<!-- 玻璃面板：半透明 + 边缘高光 + 内阴影，营造磨砂玻璃质感 -->
+	<div class="music-fs-glass"></div>
+	<!-- 细噪点：让玻璃表面有细微颗粒，避免大面积纯色显得"塑料" -->
+	<div class="music-fs-grain"></div>
+
+	<!-- 关闭按钮 -->
+	<button
+		class="music-fs-close absolute top-6 right-6 z-20 w-11 h-11 rounded-full flex items-center justify-center
+			bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all active:scale-90"
+		aria-label="关闭"
+		title="关闭（Esc）"
+	>
+		<Icon name="material-symbols:close-rounded" class="text-2xl" />
+	</button>
+
+	<!-- 主体：宽屏左右两栏，窄屏上下堆叠 -->
+	<div class="music-fs-body relative z-10 w-full max-w-6xl px-6 md:px-10 flex flex-col md:flex-row items-center md:items-stretch gap-8 md:gap-14 text-white">
+
+		<!-- 左：封面 + 信息 + 控制 -->
+		<div class="music-fs-left flex flex-col items-center justify-center shrink-0 w-full md:w-[340px]">
+			<div class="relative w-52 h-52 md:w-72 md:h-72 mb-6" style="contain: layout paint; isolation: isolate;">
+				<div class="music-fs-cover-wrap w-full h-full rounded-full overflow-hidden shadow-2xl ring-1 ring-white/25">
+					<img class="music-fs-cover animate-fs-spin" src="" alt="" style="opacity:0" />
+				</div>
+				<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-neutral-900 ring-2 ring-white/20"></div>
+			</div>
+
+			<div class="text-center w-full min-w-0 mb-5">
+				<h2 class="music-fs-title text-2xl md:text-3xl font-bold leading-tight truncate">{i18n(I18nKey.musicNoPlaying)}</h2>
+				<p class="music-fs-artist text-sm md:text-base text-white/50 mt-2 truncate"></p>
+			</div>
+
+			<!-- 进度条 -->
+			<div class="w-full mb-1">
+				<div
+					class="music-fs-progress relative w-full h-1.5 bg-white/15 rounded-full cursor-pointer group"
+					role="slider" aria-label="播放进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"
+				>
+					<div class="music-fs-progress-bar absolute left-0 top-0 h-full bg-(--primary) rounded-full w-0"></div>
+					<div class="music-fs-progress-thumb absolute top-1/2 -mt-2 w-4 h-4 bg-white rounded-full shadow scale-0 group-hover:scale-100 transition-transform"></div>
+				</div>
+				<div class="flex justify-between text-[11px] text-white/40 font-mono mt-2">
+					<span class="music-fs-current">0:00</span>
+					<span class="music-fs-total">0:00</span>
+				</div>
+			</div>
+
+			<!-- 控制按钮 -->
+			<div class="flex items-center justify-center gap-6 mt-2">
+				<button class="music-fs-prev text-white/60 hover:text-white transition-colors active:scale-90" aria-label="上一首">
+					<Icon name="material-symbols:skip-previous-rounded" class="text-4xl" />
+				</button>
+				<button class="music-fs-play w-16 h-16 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all active:scale-95" aria-label="播放/暂停">
+					<Icon name="material-symbols:play-arrow-rounded" class="music-fs-icon-play text-4xl ml-1" />
+					<Icon name="material-symbols:pause-rounded" class="music-fs-icon-pause text-4xl hidden" />
+				</button>
+				<button class="music-fs-next text-white/60 hover:text-white transition-colors active:scale-90" aria-label="下一首">
+					<Icon name="material-symbols:skip-next-rounded" class="text-4xl" />
+				</button>
+			</div>
+		</div>
+
+		<!-- 右：大号歌词 -->
+		<div class="music-fs-right flex-1 min-w-0 w-full">
+			<div
+				class="music-fs-lyrics h-[36vh] md:h-[60vh] overflow-y-auto text-center md:text-left px-2 py-[28vh] md:py-[24vh] scroll-smooth"
+				role="listbox" aria-label="歌词"
+			>
+				<div class="music-fs-lyrics-empty text-white/35 text-base py-10">{i18n(I18nKey.musicNoLyrics)}</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<style is:global>
+	/* 第一层：当前歌曲封面，重度模糊，只留色彩氛围 */
+	.music-fs-bg {
+		background-size: cover;
+		background-position: center;
+		filter: blur(80px) saturate(1.8) brightness(0.85);
+		transform: scale(1.35);
+		opacity: 0.55;
+		transition: background-image 0.7s ease;
+	}
+
+	/* 根节点底色：跟随专辑主色（--fs-deep 由脚本按封面动态设置）
+	   用 ID 选择器保证优先级高于 Tailwind 工具类，避免被覆盖成透明 */
+	#music-fullscreen.music-fs {
+		background-color: var(--fs-deep, oklch(12% 0.010 60));
+		transition: background-color 0.8s ease;
+	}
+
+	/* 第二层：专辑主色氛围光（没有提取到主色时回退到站点主题色） */
+	.music-fs-tint {
+		background:
+			radial-gradient(90rem 60rem at 12% 8%, color-mix(in oklab, var(--fs-tint, var(--primary)) 44%, transparent), transparent 60%),
+			radial-gradient(70rem 50rem at 88% 88%, color-mix(in oklab, var(--fs-tint, var(--primary)) 34%, transparent), transparent 62%),
+			radial-gradient(60rem 40rem at 50% 50%, color-mix(in oklab, var(--fs-tint, var(--primary)) 16%, transparent), transparent 72%);
+		opacity: 0.95;
+		transition: background 0.8s ease;
+	}
+
+	/* 第三层：按专辑主色压暗（左重右轻），保证歌词对比度 */
+	.music-fs-backdrop {
+		background:
+			linear-gradient(to right,
+				color-mix(in oklab, var(--fs-deep, oklch(15% 0.02 55)) 94%, transparent) 0%,
+				color-mix(in oklab, var(--fs-deep, oklch(15% 0.02 55)) 76%, transparent) 55%,
+				color-mix(in oklab, var(--fs-deep, oklch(15% 0.02 55)) 58%, transparent) 100%);
+		transition: background 0.8s ease;
+	}
+
+	/* ── 玻璃面板 ──────────────────────────────────────────
+	   用多层渐变模拟磨砂玻璃，不依赖 backdrop-filter：
+	   backdrop-filter 会对整个区域实时模糊，和唱片旋转抢 GPU 导致掉帧，
+	   而背景本身已经是 blur(80px) 的图，用半透明层叠加已经足够"磨砂"。 */
+	.music-fs-glass {
+		position: absolute;
+		inset: 4%;
+		border-radius: 2rem;
+		pointer-events: none;
+		background:
+			/* 斜向柔光：左上亮 → 右下暗，模拟玻璃受光 */
+			linear-gradient(135deg, rgb(255 255 255 / 0.10) 0%, rgb(255 255 255 / 0.03) 38%, rgb(255 255 255 / 0) 62%, rgb(255 255 255 / 0.05) 100%),
+			/* 极淡的主题色渗入，让玻璃带一点橘调 */
+			radial-gradient(60rem 40rem at 15% 10%, color-mix(in oklab, var(--fs-tint, var(--primary)) 12%, transparent), transparent 70%);
+		border: 1px solid rgb(255 255 255 / 0.14);
+		box-shadow:
+			/* 顶部内高光：玻璃上边缘的反射 */
+			inset 0 1px 0 0 rgb(255 255 255 / 0.22),
+			/* 底部内阴影，增加厚度感 */
+			inset 0 -1px 0 0 rgb(0 0 0 / 0.25),
+			/* 内圈柔光晕 */
+			inset 0 0 80px 0 rgb(255 255 255 / 0.035),
+			/* 外投影，让面板从背景中浮起 */
+			0 40px 90px -20px rgb(0 0 0 / 0.55);
+	}
+
+	/* 玻璃表面细噪点（SVG 湍流生成的噪点，叠加在玻璃之上） */
+	.music-fs-grain {
+		position: absolute;
+		inset: 4%;
+		border-radius: 2rem;
+		pointer-events: none;
+		opacity: 0.35;
+		mix-blend-mode: overlay;
+		background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='160' height='160' filter='url(%23n)' opacity='0.35'/></svg>");
+		background-size: 160px 160px;
+		mask-image: radial-gradient(circle at 50% 45%, black 40%, transparent 78%);
+		-webkit-mask-image: radial-gradient(circle at 50% 45%, black 40%, transparent 78%);
+	}
+
+	/* 歌词区加一层柔和渐变遮罩，上下边缘淡出，更聚焦中间 */
+	.music-fs-lyrics {
+		mask-image: linear-gradient(to bottom,
+			transparent 0%,
+			black 18%,
+			black 82%,
+			transparent 100%);
+		-webkit-mask-image: linear-gradient(to bottom,
+			transparent 0%,
+			black 18%,
+			black 82%,
+			transparent 100%);
+	}
+
+	/* 唱片容器：负责圆形裁剪 + 阴影 + 圆环
+	   说明：不能只靠图片自身 border-radius —— 图片带 will-change 提升为合成层后，
+	   部分 Chrome 版本会丢失 border-radius 裁剪，导致显示成方形。用父级裁剪最稳。 */
+	.music-fs-cover-wrap {
+		border-radius: 50%;
+		overflow: hidden;
+		transform: translateZ(0);
+		box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.55);
+	}
+
+	/* 封面本身是圆形并直接旋转：只在 GPU 合成层变换，不触发重绘/重排 */
+	.music-fs-cover {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		border-radius: 50%;
+		display: block;
+		transform-origin: 50% 50%;
+		backface-visibility: hidden;
+		-webkit-backface-visibility: hidden;
+	}
+
+	@keyframes fs-spin {
+		from { transform: rotate(0turn); }
+		to { transform: rotate(1turn); }
+	}
+	.animate-fs-spin {
+		animation: fs-spin 26s linear infinite;
+		animation-play-state: paused;
+		will-change: transform;
+	}
+	.music-fs.is-playing .animate-fs-spin {
+		animation-play-state: running;
+	}
+	/* 尊重系统「减少动态效果」设置 */
+	@media (prefers-reduced-motion: reduce) {
+		.animate-fs-spin { animation: none; }
+	}
+
+	/* 全屏歌词行（JS 动态创建，必须用全局样式） */
+	.music-fs-line {
+		display: block;
+		padding: 0.5rem 0;
+		font-size: 1.05rem;
+		line-height: 1.6;
+		color: rgba(255, 255, 255, 0.42);
+		transition: color 0.35s ease, transform 0.35s ease, font-size 0.35s ease;
+		transform-origin: left center;
+		cursor: pointer;
+	}
+	@media (min-width: 768px) {
+		.music-fs-line { font-size: 1.25rem; }
+	}
+	.music-fs-line:hover {
+		color: rgba(255, 255, 255, 0.65);
+	}
+	.music-fs-line.is-active {
+		color: var(--primary);
+		font-weight: 700;
+		font-size: 1.35rem;
+	}
+	@media (min-width: 768px) {
+		.music-fs-line.is-active { font-size: 1.7rem; }
+	}
+
+	.music-fs-lyrics::-webkit-scrollbar { width: 4px; }
+	.music-fs-lyrics::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 2px; }
+
+	@keyframes fs-fade-in {
+		from { opacity: 0; transform: scale(0.985); }
+		to { opacity: 1; transform: scale(1); }
+	}
+	.music-fs.opening .music-fs-body {
+		animation: fs-fade-in 0.28s ease-out;
+	}
+</style>
+
+<script define:vars={{ fsConfigStr }} is:inline>
+	(function () {
+		if (window.__musicFsInit) return;
+		window.__musicFsInit = true;
+
+		var cfg = JSON.parse(fsConfigStr);
+		var root = document.getElementById("music-fullscreen");
+		if (!root) return;
+
+		var bgEl = root.querySelector(".music-fs-bg");
+		var coverEl = root.querySelector(".music-fs-cover");
+		var titleEl = root.querySelector(".music-fs-title");
+		var artistEl = root.querySelector(".music-fs-artist");
+		var lyricsEl = root.querySelector(".music-fs-lyrics");
+		var progressEl = root.querySelector(".music-fs-progress");
+		var progressBar = root.querySelector(".music-fs-progress-bar");
+		var progressThumb = root.querySelector(".music-fs-progress-thumb");
+		var curEl = root.querySelector(".music-fs-current");
+		var totEl = root.querySelector(".music-fs-total");
+		var iconPlay = root.querySelector(".music-fs-icon-play");
+		var iconPause = root.querySelector(".music-fs-icon-pause");
+		var btnPlay = root.querySelector(".music-fs-play");
+		var curIndex = -1;
+		var userScrolling = false;
+		var scrollTimer = null;
+
+		function mgr() {
+			return window.__fireflyMusic || null;
+		}
+
+		function renderLyrics(lyrics, status) {
+			if (!lyricsEl) return;
+			curIndex = -1;
+			lyricsEl.innerHTML = "";
+
+			if (status === "loading") {
+				lyricsEl.innerHTML = '<div class="music-fs-lyrics-empty text-white/35 text-base py-10">' + cfg.i18n.loadingLyrics + "</div>";
+				return;
+			}
+			if (status === "failed") {
+				lyricsEl.innerHTML = '<div class="music-fs-lyrics-empty text-white/35 text-base py-10">' + cfg.i18n.failedLyrics + "</div>";
+				return;
+			}
+			if (!lyrics || !lyrics.length) {
+				lyricsEl.innerHTML = '<div class="music-fs-lyrics-empty text-white/35 text-base py-10">' + cfg.i18n.noLyrics + "</div>";
+				return;
+			}
+
+			lyrics.forEach(function (line, i) {
+				var el = document.createElement("div");
+				el.className = "music-fs-line";
+				el.textContent = line.text || "";
+				el.dataset.index = i;
+				el.setAttribute("role", "option");
+				el.addEventListener("click", function () {
+					var m = mgr();
+					if (m && typeof line.time === "number") m.seekToTime(line.time);
+				});
+				lyricsEl.appendChild(el);
+			});
+		}
+
+		function highlight(index) {
+			if (!lyricsEl || index === curIndex) return;
+			curIndex = index;
+			var lines = lyricsEl.querySelectorAll(".music-fs-line");
+			if (!lines.length) return;
+			lines.forEach(function (el, i) {
+				el.classList.toggle("is-active", i === index);
+			});
+			if (index >= 0 && !userScrolling) {
+				var target = lyricsEl.querySelector('.music-fs-line[data-index="' + index + '"]');
+				if (target) {
+					var top = target.offsetTop - lyricsEl.clientHeight / 2 + target.offsetHeight / 2;
+					lyricsEl.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+				}
+			}
+		}
+
+		function setPlaying(isPlaying) {
+			root.classList.toggle("is-playing", !!isPlaying);
+			if (iconPlay && iconPause) {
+				iconPlay.classList.toggle("hidden", !!isPlaying);
+				iconPause.classList.toggle("hidden", !isPlaying);
+			}
+		}
+
+		// ── 从封面提取主色，让背景跟随专辑配色 ─────────────────
+		// 用 canvas 读取像素（网易云 CDN 返回 Access-Control-Allow-Origin: *，可读）
+		// 算法：缩到 24x24，跳过过暗/过亮/低饱和像素，按饱和度加权求色相向量平均，
+		//      这样不会因为画面里混了黑白灰而把色相算偏。
+		function extractPalette(url) {
+			return new Promise(function (resolve) {
+				var img = new Image();
+				img.crossOrigin = "anonymous";
+				img.onload = function () {
+					try {
+						var S = 24;
+						var cv = document.createElement("canvas");
+						cv.width = cv.height = S;
+						var ctx = cv.getContext("2d");
+						ctx.drawImage(img, 0, 0, S, S);
+						var d = ctx.getImageData(0, 0, S, S).data;
+						var hx = 0, hy = 0, sumS = 0, sumL = 0, n = 0;
+						for (var i = 0; i < d.length; i += 4) {
+							var r = d[i] / 255, g = d[i + 1] / 255, b = d[i + 2] / 255;
+							var mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+							var l = (mx + mn) / 2;
+							var del = mx - mn;
+							var sat = del === 0 ? 0 : del / (1 - Math.abs(2 * l - 1));
+							if (l < 0.08 || l > 0.95 || sat < 0.12) continue;
+							var h;
+							if (del === 0) h = 0;
+							else if (mx === r) h = ((g - b) / del) % 6;
+							else if (mx === g) h = (b - r) / del + 2;
+							else h = (r - g) / del + 4;
+							h *= 60;
+							if (h < 0) h += 360;
+							var rad = h * Math.PI / 180, w = sat * sat;
+							hx += Math.cos(rad) * w;
+							hy += Math.sin(rad) * w;
+							sumS += sat * w;
+							sumL += l * w;
+							n += w;
+						}
+						if (n < 0.3) { resolve(null); return; }
+						var hue = Math.atan2(hy, hx) * 180 / Math.PI;
+						if (hue < 0) hue += 360;
+						resolve({ hue: hue, sat: sumS / n, light: sumL / n });
+					} catch (e) {
+						resolve(null);
+					}
+				};
+				img.onerror = function () { resolve(null); };
+				img.src = url;
+			});
+		}
+
+		// 把主色写成 CSS 变量：底色 / 氛围光
+		function applyPalette(pal) {
+			if (!pal) {
+				root.style.removeProperty("--fs-deep");
+				root.style.removeProperty("--fs-tint");
+				root.style.backgroundColor = "oklch(12% 0.010 60)";
+				return;
+			}
+			var h = Math.round(pal.hue);
+			// 底色明度跟随封面自身明度：封面亮 → 背景略亮；封面暗 → 背景更暗
+			var baseL = Math.max(0.13, Math.min(0.30, 0.13 + (pal.light - 0.35) * 0.34));
+			// 氛围光比底色鲜艳，用来做光晕
+			var glowL = Math.min(0.72, baseL + 0.38);
+			var deep = "oklch(" + (baseL * 100).toFixed(0) + "% 0.055 " + h + ")";
+			var tint = "oklch(" + (glowL * 100).toFixed(0) + "% 0.150 " + h + ")";
+			root.style.setProperty("--fs-deep", deep);
+			root.style.setProperty("--fs-tint", tint);
+			root.style.backgroundColor = deep;
+		}
+
+		// 把 meting 的 90x90 缩略图换成 600x600 高清图
+		// 原理：meting 的 pic 接口会 302 到网易云 CDN，从重定向地址里能拿到真实图片路径，
+		// 再把 param=90y90 改成更大的尺寸即可（CDN 支持到 3000x3000）
+		var coverToken = 0;
+		function hdCoverUrl(picUrl) {
+			return fetch(picUrl, { mode: "cors", redirect: "follow", cache: "force-cache" })
+				.then(function (r) { return r.url || picUrl; })
+				.then(function (u) {
+					if (!u || u === picUrl) return picUrl;
+					if (/param=\d+y\d+/.test(u)) {
+						return u.replace(/param=\d+y\d+/, "param=600y600");
+					}
+					return u + (u.indexOf("?") >= 0 ? "&" : "?") + "param=600y600";
+				})
+				.catch(function () { return picUrl; });
+		}
+
+		function applyTrack(track) {
+			if (!track) return;
+			if (titleEl) titleEl.textContent = track.name || "";
+			if (artistEl) artistEl.textContent = track.artist || "";
+			// 模板归一化后的字段名是 pic（不是 cover）
+			var cover = track.pic || track.cover || "";
+			if (!cover) return;
+
+			var token = ++coverToken;
+			if (bgEl) bgEl.style.backgroundImage = 'url("' + cover + '")';
+
+			hdCoverUrl(cover).then(function (hd) {
+				if (token !== coverToken) return; // 切歌太快，丢弃旧结果
+				if (coverEl) {
+					coverEl.style.opacity = "0";
+					coverEl.onload = function () { coverEl.style.opacity = "1"; };
+					coverEl.src = hd;
+				}
+				if (bgEl) bgEl.style.backgroundImage = 'url("' + hd + '")';
+				// 从高清封面提取主色，驱动背景配色
+				extractPalette(hd).then(function (pal) {
+					if (token !== coverToken) return;
+					applyPalette(pal);
+				});
+			});
+		}
+
+		function updateTime(s) {
+			if (progressBar) progressBar.style.width = (s.progress || 0) + "%";
+			if (progressThumb) {
+				progressThumb.style.left = (s.progress || 0) + "%";
+				progressThumb.style.marginLeft = "-8px";
+			}
+			if (curEl) curEl.textContent = s.currentTimeStr || "0:00";
+			if (totEl) totEl.textContent = s.durationStr || "0:00";
+			if (progressEl) progressEl.setAttribute("aria-valuenow", String(Math.round(s.progress || 0)));
+		}
+
+		function syncFromState() {
+			var m = mgr();
+			if (!m) return;
+			var s = m.getState();
+			applyTrack(s.track);
+			renderLyrics(s.lyrics, s.lyrics && s.lyrics.length ? "loaded" : "none");
+			setPlaying(s.isPlaying);
+			updateTime(s);
+			if (s.currentLrcIndex >= 0) highlight(s.currentLrcIndex);
+		}
+
+		// ── 打开 / 关闭 ──────────────────────────────────────────
+		function open() {
+			root.classList.remove("hidden");
+			root.classList.add("flex", "opening");
+			document.documentElement.style.overflow = "hidden";
+			syncFromState();
+			setTimeout(function () { root.classList.remove("opening"); }, 320);
+		}
+		function close() {
+			root.classList.add("hidden");
+			root.classList.remove("flex");
+			document.documentElement.style.overflow = "";
+		}
+		function isOpen() {
+			return !root.classList.contains("hidden");
+		}
+		window.__musicFsOpen = open;
+		window.__musicFsClose = close;
+
+		// 支持通过 #music 锚点直接打开（便于分享与调试）
+		function checkHash() {
+			if (location.hash === "#music") open();
+		}
+		window.addEventListener("hashchange", function () {
+			if (location.hash === "#music") open();
+		});
+
+		// 点击歌名 → 打开全屏（事件委托，兼容 swup 换页后的新 DOM）
+		document.addEventListener("click", function (e) {
+			var t = e.target;
+			if (t && t.closest && t.closest(".music-title")) {
+				e.preventDefault();
+				open();
+			}
+		});
+
+		var closeBtn = root.querySelector(".music-fs-close");
+		if (closeBtn) closeBtn.addEventListener("click", close);
+
+		root.addEventListener("click", function (e) {
+			if (e.target === root) close();
+		});
+
+		document.addEventListener("keydown", function (e) {
+			if (e.key === "Escape" && isOpen()) close();
+		});
+
+		// ── 控制按钮 ──────────────────────────────────────────────
+		if (btnPlay) btnPlay.addEventListener("click", function () { var m = mgr(); if (m) m.togglePlay(); });
+		var btnPrev = root.querySelector(".music-fs-prev");
+		var btnNext = root.querySelector(".music-fs-next");
+		if (btnPrev) btnPrev.addEventListener("click", function () { var m = mgr(); if (m) m.playPrev(); });
+		if (btnNext) btnNext.addEventListener("click", function () { var m = mgr(); if (m) m.playNext(); });
+
+		// 进度条点击 / 拖动
+		function seekByEvent(e) {
+			if (!progressEl) return;
+			var rect = progressEl.getBoundingClientRect();
+			var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+			var pct = Math.min(100, Math.max(0, ((clientX - rect.left) / rect.width) * 100));
+			var m = mgr();
+			if (m) m.seek(pct);
+		}
+		if (progressEl) {
+			var dragging = false;
+			progressEl.addEventListener("mousedown", function (e) { dragging = true; seekByEvent(e); });
+			window.addEventListener("mousemove", function (e) { if (dragging) seekByEvent(e); });
+			window.addEventListener("mouseup", function () { dragging = false; });
+			progressEl.addEventListener("touchstart", function (e) { seekByEvent(e); }, { passive: true });
+			progressEl.addEventListener("touchmove", function (e) { seekByEvent(e); }, { passive: true });
+		}
+
+		// 用户手动滚动歌词时，暂时停止自动居中
+		if (lyricsEl) {
+			lyricsEl.addEventListener("scroll", function () {
+				userScrolling = true;
+				clearTimeout(scrollTimer);
+				scrollTimer = setTimeout(function () { userScrolling = false; }, 2500);
+			}, { passive: true });
+		}
+
+		// ── 监听播放器事件 ────────────────────────────────────────
+		window.addEventListener("fm:track", function (e) {
+			applyTrack(e.detail.track);
+			if (!isOpen()) return;
+			var m = mgr();
+			if (m) {
+				var s = m.getState();
+				renderLyrics(s.lyrics, s.lyrics && s.lyrics.length ? "loaded" : "none");
+			}
+		});
+		window.addEventListener("fm:play-state", function (e) { setPlaying(e.detail.isPlaying); });
+		window.addEventListener("fm:time", function (e) {
+			if (!isOpen()) return;
+			updateTime({
+				progress: e.detail.progress,
+				currentTimeStr: e.detail.currentTimeStr,
+				durationStr: e.detail.durationStr,
+			});
+		});
+		window.addEventListener("fm:lyrics", function (e) {
+			if (isOpen()) renderLyrics(e.detail.lyrics, e.detail.status);
+		});
+		window.addEventListener("fm:lrc-index", function (e) {
+			if (isOpen()) highlight(e.detail.index);
+		});
+
+		// 初始检查（页面带 #music 时自动打开）
+		checkHash();
+		window.addEventListener("load", checkHash);
+	})();
+</script>
